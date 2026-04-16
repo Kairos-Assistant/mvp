@@ -50,9 +50,16 @@ export default function App() {
       setUser(currentUser);
       setIsAuthLoading(false);
       
-      // @ts-ignore
-      const rawAdminEmails = import.meta.env?.ADMIN_EMAILS;
-      const adminEmails = rawAdminEmails.split(',').map((e: string) => e.trim());
+      const fallbackEmails = "lseyoum@andrew.cmu.edu,sajayi@andrew.cmu.edu";
+      let rawAdminEmails = fallbackEmails;
+      try {
+        // @ts-ignore
+        if (typeof import.meta !== "undefined" && import.meta.env) {
+          // @ts-ignore
+          rawAdminEmails = import.meta.env.VITE_ADMIN_EMAILS || import.meta.env.ADMIN_EMAILS || fallbackEmails;
+        }
+      } catch (e) {}
+      const adminEmails = String(rawAdminEmails || fallbackEmails).split(',').map((e: string) => e.trim());
       
       // Check if admin
       if (currentUser?.email && adminEmails.includes(currentUser.email)) {
