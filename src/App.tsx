@@ -16,7 +16,7 @@ import History from "./components/History";
 import Sidebar from "./components/Sidebar";
 import BetaBanner from "./components/BetaBanner";
 import LandingPage from "./components/LandingPage";
-import Registrations from "./components/Registrations";
+import AdminDashboard from "./components/AdminDashboard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X, Settings, RotateCcw, LogIn, LogOut, User as UserIcon, ShieldCheck, AlertCircle } from "lucide-react";
@@ -50,8 +50,11 @@ export default function App() {
       setUser(currentUser);
       setIsAuthLoading(false);
       
+      const env = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} : {};
+      const adminEmails = (env.VITE_ADMIN_EMAILS || "").split(',').map((e: string) => e.trim());
+      
       // Check if admin
-      if (currentUser?.email === "lseyoum@andrew.cmu.edu") {
+      if (currentUser?.email && adminEmails.includes(currentUser.email)) {
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
@@ -62,7 +65,13 @@ export default function App() {
     setProfiles(loadedProfiles);
     
     const currentId = StorageService.getCurrentProfileId();
-    if (currentId) {
+    if (window.location.pathname === "/admin" || window.location.pathname === "/admin/") {
+      setCurrentScreen("admin");
+      if (currentId) {
+        const profile = loadedProfiles.find(p => p.id === currentId);
+        if (profile) setCurrentProfile(profile);
+      }
+    } else if (currentId) {
       const profile = loadedProfiles.find(p => p.id === currentId);
       if (profile) {
         setCurrentProfile(profile);
@@ -192,7 +201,7 @@ export default function App() {
             onProfileSwitch={() => setCurrentScreen("welcome")}
             onOpenSettings={() => setShowSettings(true)}
             onLogoClick={() => setCurrentScreen("landing")}
-            isAdmin={isAdmin || true} // Allow admin access without login as requested
+            isAdmin={isAdmin}
           />
 
           {/* Main Content */}
@@ -260,7 +269,7 @@ export default function App() {
                   />
                 )}
                 {currentScreen === "admin" && (
-                  <Registrations />
+                  <AdminDashboard />
                 )}
               </motion.div>
             </AnimatePresence>

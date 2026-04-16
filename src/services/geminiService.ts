@@ -40,6 +40,7 @@ export const GeminiService = {
       5. Do not coach or give answers.
       6. If the founder was off-topic in the previous turn, nudge them back to focus.
       7. IMPORTANT: If this is the FIRST question (transcript is empty), you MUST start by briefly repeating what the founder is working on (e.g., "So, you're building [One-liner] for [Target Segment]. My first question is...") before asking your question.
+      8. POLICY CHECK: At an appropriate point during the simulation, strictly check if the founder actually understands the legal and regulatory policies governing their business in their region of operation.
       
       Return JSON format:
       {

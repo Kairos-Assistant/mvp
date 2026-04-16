@@ -67,8 +67,8 @@ export default function Registrations() {
             </div>
             <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Admin Dashboard</span>
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Registered Founders</h1>
-          <p className="text-slate-500 mt-2">Manage and view all email registrations from the beta signup.</p>
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Beta Waitlist</h1>
+          <p className="text-slate-500 mt-2">Manage and view the count and list of users in the beta waitlist.</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ export default function Registrations() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-3xl border border-black/5 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Total Registrations</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Waitlist Count</p>
           <p className="text-3xl font-bold text-slate-900">{registrations.length}</p>
         </div>
         <div className="bg-white p-6 rounded-3xl border border-black/5 shadow-sm">
@@ -134,8 +134,8 @@ export default function Registrations() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-black/5">Founder Email</th>
-                <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-black/5">Registration Date</th>
+                <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-black/5">Waitlisted Email</th>
+                <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-black/5">Joined Waitlist Date</th>
                 <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-black/5 text-right">Status</th>
               </tr>
             </thead>

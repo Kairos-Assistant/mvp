@@ -1,12 +1,23 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, getDocFromServer, Timestamp } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
+import localConfig from '../../firebase-applet-config.json';
+
+const env = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} : {};
+
+const firebaseConfig = {
+  apiKey: env.VITE_FIREBASE_API_KEY || localConfig.apiKey,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || localConfig.authDomain,
+  projectId: env.VITE_FIREBASE_PROJECT_ID || localConfig.projectId,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || localConfig.storageBucket,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || localConfig.messagingSenderId,
+  appId: env.VITE_FIREBASE_APP_ID || localConfig.appId
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 
 // Operation types for error handling
@@ -80,6 +91,7 @@ export async function testConnection() {
 
 // Auth helpers
 export const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
+export const loginWithEmail = (email: string, pass: string) => signInWithEmailAndPassword(auth, email, pass);
 export const logout = () => signOut(auth);
 
 // Firestore helpers
@@ -105,6 +117,18 @@ export const getRegistrations = async () => {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     handleFirestoreError(error, OperationType.LIST, path);
+  }
+};
+
+export const getUsers = async () => {
+  const path = 'users';
+  try {
+    const q = query(collection(db, path), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.LIST, path);
+    return []; // Return empty array so it doesn't crash if permissions not set yet
   }
 };
 

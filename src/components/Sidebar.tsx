@@ -32,10 +32,6 @@ export default function Sidebar({
     { id: "profile", label: "Company Profile", icon: Briefcase },
   ];
 
-  if (isAdmin) {
-    navItems.push({ id: "admin", label: "Admin", icon: Shield });
-  }
-
   if (!currentProfile && currentScreen !== "welcome") return null;
 
   return (
