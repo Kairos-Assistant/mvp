@@ -6,12 +6,12 @@ import localConfig from '../../firebase-applet-config.json';
 const env = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} : {};
 
 const firebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY || localConfig.apiKey,
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || localConfig.authDomain,
-  projectId: env.VITE_FIREBASE_PROJECT_ID || localConfig.projectId,
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || localConfig.storageBucket,
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || localConfig.messagingSenderId,
-  appId: env.VITE_FIREBASE_APP_ID || localConfig.appId
+  apiKey: env.FIREBASE_API_KEY || localConfig.apiKey,
+  authDomain: env.FIREBASE_AUTH_DOMAIN || localConfig.authDomain,
+  projectId: env.FIREBASE_PROJECT_ID || localConfig.projectId,
+  storageBucket: env.FIREBASE_STORAGE_BUCKET || localConfig.storageBucket,
+  messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID || localConfig.messagingSenderId,
+  appId: env.FIREBASE_APP_ID || localConfig.appId
 };
 
 // Initialize Firebase
