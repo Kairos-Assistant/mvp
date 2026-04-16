@@ -1,22 +1,17 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { CompanyProfile, EvaluatorType, FocusMode, Difficulty, Message, ScoreReport } from "../types";
 import { CATEGORIES, FOCUS_WEIGHTS, EVALUATOR_EMPHASIS } from "../constants";
 
-// For the stable SDK, we use the standard model names.
-// "gemini-2.0-flash-thinking-exp" is the current active alias for the thinking model.
 const MODEL_NAME = "gemini-3-flash-preview";
 
 export const GeminiService = {
   getAI: () => {
+    // Vite does not support process.env in the browser. 
+    // We must use a safe check for import.meta.env or a dynamic window property.
     // @ts-ignore
     const env = typeof import.meta !== 'undefined' ? (import.meta as any).env : {};
-    const key = env?.VITE_GEMINI_API_KEY || env?.GEMINI_API_KEY || "MY_GEMINI_API_KEY";
-    
-    if (key === "MY_GEMINI_API_KEY") {
-      console.warn("WARNING: Using default placeholder GEMINI_API_KEY! API requests will fail.");
-    }
-    
-    return new GoogleGenerativeAI(key);
+    const key = env?.VITE_GEMINI_API_KEY || "MY_GEMINI_API_KEY";
+    return new GoogleGenAI({ apiKey: key });
   },
 
   generateQuestion: async (
@@ -26,15 +21,7 @@ export const GeminiService = {
     difficulty: Difficulty,
     transcript: Message[]
   ): Promise<{ question: string; context: string; nudge?: string }> => {
-    const genAI = GeminiService.getAI();
-    const model = genAI.getGenerativeModel({ 
-      model: MODEL_NAME,
-      generationConfig: {
-        responseMimeType: "application/json",
-      },
-      // @ts-ignore
-      thinkingConfig: { include_thoughts: true }
-    });
+    const ai = GeminiService.getAI();
     
     const systemInstruction = `
       You are a ${evaluator} conducting an investor-readiness simulation for a founder.
@@ -58,7 +45,6 @@ export const GeminiService = {
       5. Do not coach or give answers.
       6. If the founder was off-topic in the previous turn, nudge them back to focus.
       7. IMPORTANT: If this is the FIRST question (transcript is empty), you MUST start by briefly repeating what the founder is working on (e.g., "So, you're building [One-liner] for [Target Segment]. My first question is...") before asking your question.
-      8. POLICY CHECK: At an appropriate point during the simulation, strictly check if the founder actually understands the legal and regulatory policies governing their business in their region of operation.
       
       Return JSON format:
       {
@@ -68,26 +54,33 @@ export const GeminiService = {
       }
     `;
 
-    const chat = model.startChat({
-      history: transcript.length > 0 
-        ? transcript.map(m => ({ 
-            role: m.role === 'investor' ? 'model' : 'user', 
-            parts: [{ text: m.content }] 
-          }))
-        : [],
+    const contents = transcript.length > 0 
+      ? transcript.map(m => ({ role: m.role === 'investor' ? 'model' : 'user', parts: [{ text: m.content }] }))
+      : [{ role: 'user', parts: [{ text: "Start the simulation." }] }];
+
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents,
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            question: { type: Type.STRING },
+            context: { type: Type.STRING },
+            nudge: { type: Type.STRING, description: "Optional nudge if the founder was off-topic" }
+          },
+          required: ["question", "context"]
+        }
+      }
     });
 
-    const prompt = transcript.length === 0 
-      ? `${systemInstruction}\n\nStart the simulation.` 
-      : `${systemInstruction}\n\nContinue the simulation based on the history above.`;
-
-    const result = await chat.sendMessage(prompt);
-    const responseText = result.response.text();
-
     try {
-      return JSON.parse(responseText || "{}");
+      return JSON.parse(response.text || "{}");
     } catch (e) {
-      console.error("Failed to parse AI response", responseText);
+      console.error("Failed to parse AI response", response.text);
       return {
         question: "Could you elaborate more on your business model?",
         context: "Skeptical, looking for clarity."
@@ -101,19 +94,11 @@ export const GeminiService = {
     transcript: Message[],
     roundLength: number
   ): Promise<ScoreReport> => {
-    const genAI = GeminiService.getAI();
-    const model = genAI.getGenerativeModel({ 
-      model: MODEL_NAME,
-      generationConfig: {
-        responseMimeType: "application/json",
-      },
-      // @ts-ignore
-      thinkingConfig: { include_thoughts: true }
-    });
+    const ai = GeminiService.getAI();
     
     const weights = FOCUS_WEIGHTS[focus];
     
-    const prompt = `
+    const systemInstruction = `
       You are an expert investor analyst. Score the following founder interview transcript.
       
       Company Profile:
@@ -143,9 +128,6 @@ export const GeminiService = {
       6. Determine a Confidence Level (Low, Medium, High). 
       7. Provide a short investor-style summary.
       
-      Transcript:
-      ${JSON.stringify(transcript)}
-
       Return JSON format:
       {
         "categoryScores": {
@@ -165,9 +147,17 @@ export const GeminiService = {
       }
     `;
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-    const rawResult = JSON.parse(responseText || "{}");
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: [{ parts: [{ text: JSON.stringify(transcript) }] }],
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
+      }
+    });
+
+    const rawResult = JSON.parse(response.text || "{}");
     
     let convictionScore = 0;
     const categoryScores: Record<string, any> = {};
