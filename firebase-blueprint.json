@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID." },
+        "email": { "type": "string", "format": "email", "description": "User email address." },
+        "displayName": { "type": "string", "description": "User display name." },
+        "photoURL": { "type": "string", "description": "User profile photo URL." },
+        "role": { "type": "string", "enum": ["admin", "user"], "description": "User role." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation time." }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Simulation": {
+      "title": "Simulation",
+      "description": "A founder-investor simulation session.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Simulation ID." },
+        "userId": { "type": "string", "description": "The user who ran the simulation." },
+        "convictionScore": { "type": "number", "description": "The final conviction score (0-100)." },
+        "feedback": { "type": "array", "items": { "type": "string" }, "description": "List of feedback items." },
+        "transcript": { "type": "array", "items": { "type": "object" }, "description": "The full conversation transcript." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the simulation was completed." }
+      },
+      "required": ["id", "userId", "convictionScore", "feedback", "transcript", "createdAt"]
+    },
+    "Registration": {
+      "title": "Registration",
+      "description": "A record of a user registering their email.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "description": "Registered email address." },
+        "registeredAt": { "type": "string", "format": "date-time", "description": "When the registration occurred." }
+      },
+      "required": ["email", "registeredAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles."
+    },
+    "/simulations/{simulationId}": {
+      "schema": "Simulation",
+      "description": "Simulation results."
+    },
+    "/registrations/{registrationId}": {
+      "schema": "Registration",
+      "description": "Email registrations."
+    }
+  }
+}

@@ -1,0 +1,126 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId}
+// Fields:
+//   - uid: string (required) - Firebase Auth UID
+//   - email: string (required, email) - User email address
+//   - displayName: string (optional) - User display name
+//   - photoURL: string (optional) - User profile photo URL
+//   - role: string (required, enum: ['admin', 'user']) - User role
+//   - createdAt: timestamp (required) - Account creation time
+//
+// Collection: simulations
+// Document ID: {simulationId}
+// Fields:
+//   - id: string (required) - Simulation ID
+//   - userId: string (required) - The user who ran the simulation
+//   - convictionScore: number (required, 0-100) - The final conviction score
+//   - feedback: list (required, strings) - List of feedback items
+//   - transcript: list (required, objects) - The full conversation transcript
+//   - createdAt: timestamp (required) - When the simulation was completed
+//
+// Collection: registrations
+// Document ID: {registrationId}
+// Fields:
+//   - email: string (required, email) - Registered email address
+//   - registeredAt: timestamp (required) - When the registration occurred
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "lseyoum@andrew.cmu.edu" && request.auth.token.email_verified == true));
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['uid', 'email', 'role', 'createdAt']) &&
+             hasOnlyAllowedFields(['uid', 'email', 'displayName', 'photoURL', 'role', 'createdAt']) &&
+             data.uid is string && data.uid == request.auth.uid &&
+             data.email is string && isValidEmail(data.email) &&
+             data.role in ['admin', 'user'] &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidSimulation(data) {
+      return hasRequiredFields(['id', 'userId', 'convictionScore', 'feedback', 'transcript', 'createdAt']) &&
+             data.id is string &&
+             data.userId is string && (isAuthenticated() ? data.userId == request.auth.uid : true) &&
+             data.convictionScore is number && data.convictionScore >= 0 && data.convictionScore <= 100 &&
+             data.feedback is list &&
+             data.transcript is list &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidRegistration(data) {
+      return hasRequiredFields(['email', 'registeredAt']) &&
+             hasOnlyAllowedFields(['email', 'registeredAt']) &&
+             data.email is string && isValidEmail(data.email) &&
+             data.registeredAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && (isOwner(userId) && request.resource.data.role == 'user' || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (isOwner(userId) && request.resource.data.role == resource.data.role || isAdmin());
+    }
+
+    match /simulations/{simulationId} {
+      allow read: if true; // Allow public read as requested for "not sign in"
+      allow create: if isValidSimulation(request.resource.data);
+      allow update: if true; // Allow public update for simplicity in unauthenticated mode
+      allow delete: if isAdmin();
+    }
+
+    match /registrations/{registrationId} {
+      allow read: if true; // Allow public read for registrations in unauthenticated mode
+      allow create: if isValidRegistration(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}
