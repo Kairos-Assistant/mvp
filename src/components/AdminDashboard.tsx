@@ -14,8 +14,9 @@ export default function AdminDashboard() {
   const [dbUsers, setDbUsers] = useState<any[]>([]);
   const [localAdminUser, setLocalAdminUser] = useState<string | null>(localStorage.getItem('kairos_admin_session'));
 
-  const env = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} : {};
-  const ADMIN_EMAILS = (env.VITE_ADMIN_EMAILS || "").split(',').map((e: string) => e.trim());
+  // @ts-ignore
+  const rawAdminEmails = import.meta.env?.ADMIN_EMAILS;
+  const ADMIN_EMAILS = rawAdminEmails.split(',').map((e: string) => e.trim());
 
   const [emailInput, setEmailInput] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);

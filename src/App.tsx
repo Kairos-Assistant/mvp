@@ -50,8 +50,9 @@ export default function App() {
       setUser(currentUser);
       setIsAuthLoading(false);
       
-      const env = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} : {};
-      const adminEmails = (env.VITE_ADMIN_EMAILS || "").split(',').map((e: string) => e.trim());
+      // @ts-ignore
+      const rawAdminEmails = import.meta.env?.ADMIN_EMAILS;
+      const adminEmails = rawAdminEmails.split(',').map((e: string) => e.trim());
       
       // Check if admin
       if (currentUser?.email && adminEmails.includes(currentUser.email)) {
