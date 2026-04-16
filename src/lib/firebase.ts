@@ -1,17 +1,20 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, getDocFromServer, Timestamp } from 'firebase/firestore';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 import localConfig from '../../firebase-applet-config.json';
 
 const env = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} : {};
 
 const firebaseConfig = {
-  apiKey: env.FIREBASE_API_KEY || localConfig.apiKey,
-  authDomain: env.FIREBASE_AUTH_DOMAIN || localConfig.authDomain,
-  projectId: env.FIREBASE_PROJECT_ID || localConfig.projectId,
-  storageBucket: env.FIREBASE_STORAGE_BUCKET || localConfig.storageBucket,
-  messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID || localConfig.messagingSenderId,
-  appId: env.FIREBASE_APP_ID || localConfig.appId
+  apiKey: env.VITE_FIREBASE_API_KEY || localConfig.apiKey,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || localConfig.authDomain,
+  projectId: env.VITE_FIREBASE_PROJECT_ID || localConfig.projectId,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || localConfig.storageBucket,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || localConfig.messagingSenderId,
+  appId: env.VITE_FIREBASE_APP_ID || localConfig.appId,
+  // @ts-ignore
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || localConfig.measurementId
 };
 
 // Initialize Firebase
@@ -19,6 +22,13 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
+
+export let analytics: any = null;
+isSupported().then(supported => {
+  if (supported) {
+    analytics = getAnalytics(app);
+  }
+});
 
 // Operation types for error handling
 export enum OperationType {

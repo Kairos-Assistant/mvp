@@ -48,10 +48,13 @@ export default function WelcomeScreen({ profiles, onSelect, onNew }: WelcomeScre
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4">Continue with</h2>
             <div className="grid gap-3">
               {profiles.map((profile) => (
-                <button
+                <div
                   key={profile.id}
                   onClick={() => onSelect(profile)}
-                  className="flex items-center justify-between p-6 bg-white/40 backdrop-blur-sm border border-black/5 rounded-xl hover:border-[#6279b8] transition-all group text-left"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') onSelect(profile); }}
+                  className="flex items-center justify-between p-6 bg-white/40 backdrop-blur-sm border border-black/5 rounded-xl hover:border-[#6279b8] transition-all group text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-white/40 flex items-center justify-center text-[#6279b8]">
@@ -65,13 +68,14 @@ export default function WelcomeScreen({ profiles, onSelect, onNew }: WelcomeScre
                   <div className="flex items-center gap-4">
                     <button 
                       onClick={(e) => handleDelete(e, profile.id)}
-                      className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                      className="p-2 text-slate-400 hover:text-red-500 transition-colors z-10"
+                      aria-label="Delete profile"
                     >
                       <Trash2 size={18} />
                     </button>
                     <ChevronRight className="text-slate-400 group-hover:text-[#6279b8] group-hover:translate-x-1 transition-all" />
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           </div>

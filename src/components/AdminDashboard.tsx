@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, loginWithGoogle, loginWithEmail, getUserSimulations, getUsers } from '../lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { ShieldCheck, LogIn, AlertCircle, BarChart3, Users, Home } from 'lucide-react';
+import { ShieldCheck, LogIn, AlertCircle, BarChart3, Users, Home, LogOut } from 'lucide-react';
 import Registrations from './Registrations';
 import { cn } from '../lib/utils';
 import { format } from 'date-fns';
@@ -83,6 +83,15 @@ export default function AdminDashboard() {
     } else {
       setErrorMsg("This email is not authorized as an administrator.");
     }
+  };
+
+  const handleAdminLogout = async () => {
+    localStorage.removeItem('kairos_admin_session');
+    setLocalAdminUser(null);
+    try {
+      await auth.signOut();
+    } catch(e) {}
+    window.location.href = '/';
   };
 
   if (loading) {
@@ -174,9 +183,14 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-slate-500 mt-2">Manage registered founders, waitlist, and view simulation statistics.</p>
           </div>
-          <button onClick={() => window.location.href = '/'} className="p-3 px-6 bg-white border border-black/5 rounded-xl hover:bg-slate-50 transition-colors text-slate-600 flex items-center gap-2 font-bold text-sm shadow-sm">
-            <Home size={18} /> Exit Admin Dashboard
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => window.location.href = '/'} className="p-3 px-6 bg-white border border-black/5 rounded-xl hover:bg-slate-50 transition-colors text-slate-600 flex items-center gap-2 font-bold text-sm shadow-sm">
+              <Home size={18} /> Home
+            </button>
+            <button onClick={handleAdminLogout} className="p-3 px-6 bg-slate-900 border border-black/5 rounded-xl hover:bg-slate-800 transition-colors text-white flex items-center gap-2 font-bold text-sm shadow-sm">
+              <LogOut size={18} /> Sign Out
+            </button>
+          </div>
         </div>
 
         <div className="flex gap-2 mb-8 bg-black/5 p-1.5 rounded-2xl w-full sm:w-fit overflow-x-auto">
