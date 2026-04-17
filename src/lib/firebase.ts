@@ -3,6 +3,8 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPasswor
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, getDocFromServer, Timestamp } from 'firebase/firestore';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import localConfig from '../../firebase-applet-config.json';
+import { getStorage } from 'firebase/storage';
+
 
 const env = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} : {};
 
@@ -22,6 +24,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
+export const storage = getStorage(app);
 
 export let analytics: any = null;
 isSupported().then(supported => {

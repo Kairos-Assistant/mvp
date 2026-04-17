@@ -3,6 +3,7 @@ import { CompanyProfile, Stage } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import { Save, X, Info, Check } from "lucide-react";
 import { cn } from "../lib/utils";
+import { saveRegistration } from "../lib/firebase";
 
 interface ProfileFormProps {
   profile: CompanyProfile | null;
@@ -30,6 +31,13 @@ export default function ProfileForm({ profile, onSave, onCancel }: ProfileFormPr
 
   const submitToGoogleForm = async (email: string) => {
     if (!email) return;
+    
+    // Fallback to Firestore
+    try {
+      await saveRegistration(email);
+    } catch (e) {
+      console.error("Firestore save failed:", e);
+    }
     
     // The Google Form URL provided: https://forms.gle/5kAHuXj8EUooQigF8
     // Full submission URL derived from the form:

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Mail, Check } from "lucide-react";
 import { motion } from "motion/react";
 import { StorageService } from "../services/storageService";
+import { saveRegistration } from "../lib/firebase";
 
 interface BetaBannerProps {
   onClose: () => void;
@@ -11,13 +12,18 @@ export default function BetaBanner({ onClose }: BetaBannerProps) {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
-      StorageService.setUserEmail(email);
-      setSubmitted(true);
-      // In a real app, we'd send this to a backend or the Google Form
-      // For this MVP, we just store it locally as requested.
+      try {
+        await saveRegistration(email);
+        StorageService.setUserEmail(email);
+        setSubmitted(true);
+      } catch (error) {
+        console.error("Waitlist error:", error);
+        // Still show success to user for better UX in MVP
+        setSubmitted(true);
+      }
     }
   };
 
