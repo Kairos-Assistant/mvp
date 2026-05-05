@@ -1,9 +1,25 @@
 import React, { useState } from "react";
 import { CompanyProfile, Stage } from "../types";
 import { v4 as uuidv4 } from "uuid";
-import { Save, X, Info, Check } from "lucide-react";
+import { Save, X, Info, Check, ChevronDown } from "lucide-react";
 import { cn } from "../lib/utils";
 import { saveRegistration } from "../lib/firebase";
+
+const BUSINESS_MODELS = [
+  "B2B",
+  "B2C",
+  "B2B2C",
+  "B2G",
+  "B2B2G",
+];
+
+const STAGES = [
+  { id: 'idea', label: 'Idea Phase' },
+  { id: 'mvp', label: 'MVP / Prototype' },
+  { id: 'traction', label: 'Early Traction' },
+  { id: 'revenue', label: 'Revenue Generating' },
+  { id: 'scale', label: 'Scaling' }
+];
 
 interface ProfileFormProps {
   profile: CompanyProfile | null;
@@ -63,6 +79,15 @@ export default function ProfileForm({ profile, onSave, onCancel }: ProfileFormPr
     } catch (error) {
       console.error("Error submitting to Google Form:", error);
     }
+  };
+
+  const toggleBusinessModel = (model: string) => {
+    const current = (formData.businessModel || "").split(",").map(s => s.trim()).filter(Boolean);
+    const updated = current.includes(model)
+      ? current.filter(m => m !== model)
+      : [...current, model];
+    
+    setFormData(prev => ({ ...prev, businessModel: updated.join(", ") }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -178,36 +203,49 @@ export default function ProfileForm({ profile, onSave, onCancel }: ProfileFormPr
 
             <div className="space-y-2">
               <label className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                Stage
+                Current Stage
               </label>
-              <select
-                required
-                name="stage"
-                value={formData.stage}
-                onChange={handleChange}
-                className="w-full p-4 bg-white/40 border border-black/5 rounded-lg focus:ring-2 focus:ring-[#6279b8] outline-none transition-all appearance-none"
-              >
-                <option value="idea">Idea</option>
-                <option value="MVP">MVP</option>
-                <option value="traction">Traction</option>
-                <option value="revenue">Revenue</option>
-                <option value="scale">Scale</option>
-              </select>
+              <div className="relative">
+                <select
+                  required
+                  name="stage"
+                  value={formData.stage}
+                  onChange={handleChange}
+                  className="w-full p-4 bg-white/40 border border-black/5 rounded-lg focus:ring-2 focus:ring-[#6279b8] outline-none transition-all appearance-none cursor-pointer pr-10"
+                >
+                  {STAGES.map(s => (
+                    <option key={s.id} value={s.id}>{s.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="text-sm font-bold uppercase tracking-wider text-slate-500">
-              Business Model
+              Business Model (Select all that apply)
             </label>
-            <input
-              required
-              name="businessModel"
-              value={formData.businessModel}
-              onChange={handleChange}
-              placeholder="e.g. B2B SaaS subscription"
-              className="w-full p-4 bg-white/40 border border-black/5 rounded-lg focus:ring-2 focus:ring-[#6279b8] outline-none transition-all"
-            />
+            <div className="flex flex-wrap gap-2">
+              {BUSINESS_MODELS.map(model => {
+                const isSelected = (formData.businessModel || "").includes(model);
+                return (
+                  <button
+                    key={model}
+                    type="button"
+                    onClick={() => toggleBusinessModel(model)}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-sm font-bold transition-all border",
+                      isSelected 
+                        ? "bg-[#6279b8] text-white border-[#6279b8] shadow-md shadow-[#6279b8]/20" 
+                        : "bg-white/40 text-slate-600 border-black/5 hover:border-[#6279b8]/30"
+                    )}
+                  >
+                    {model}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="space-y-2">

@@ -1,7 +1,7 @@
 import { SimulationSession } from "../types";
 import { CATEGORIES } from "../constants";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
-import { Award, Target, AlertTriangle, ArrowRight, CheckCircle2, ChevronDown, ChevronUp, BarChart3, X } from "lucide-react";
+import { Award, Target, AlertTriangle, ArrowRight, CheckCircle2, ChevronDown, ChevronUp, BarChart3, X, Timer } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "../lib/utils";
 
@@ -71,6 +71,16 @@ export default function ResultsScreen({ session, onDone }: ResultsScreenProps) {
               <div className="flex items-center gap-1 text-sm font-bold text-slate-500">
                 <BarChart3 size={14} />
                 <span>{scores.coverageScore}% Coverage</span>
+              </div>
+              <div className="flex items-center gap-1 text-sm font-bold text-slate-500">
+                <Timer size={14} />
+                <span>
+                  {session.timeUsed ? (
+                    `${Math.floor(session.timeUsed / 60)}m ${session.timeUsed % 60}s`
+                  ) : (
+                    'N/A'
+                  )}
+                </span>
               </div>
             </div>
             <p className="text-lg text-slate-700 leading-relaxed italic font-medium">

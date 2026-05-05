@@ -1,7 +1,7 @@
 import { CompanyProfile, SimulationSession } from "../types";
 import { StorageService } from "../services/storageService";
 import React, { useState, useEffect } from "react";
-import { Calendar, Award, ChevronRight, Search, Filter, History as HistoryIcon } from "lucide-react";
+import { Calendar, Award, ChevronRight, Search, Filter, History as HistoryIcon, Timer } from "lucide-react";
 import { cn } from "../lib/utils";
 
 interface HistoryProps {
@@ -75,6 +75,16 @@ export default function History({ profile, onViewSession }: HistoryProps) {
                       session.scores.confidenceLevel === 'Medium' ? "text-amber-500" : "text-red-500"
                     )}>
                       {session.scores.confidenceLevel} Confidence
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Timer size={12} />
+                    <span>
+                      {session.timeUsed ? (
+                        `${Math.floor(session.timeUsed / 60)}m ${session.timeUsed % 60}s`
+                      ) : (
+                        'N/A'
+                      )}
                     </span>
                   </div>
                 </div>

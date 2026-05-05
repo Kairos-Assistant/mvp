@@ -68,7 +68,8 @@ export interface SimulationSession {
   evaluatorType: EvaluatorType;
   focusType: FocusMode;
   difficulty: Difficulty;
-  roundLength: number; // minutes
+  roundLength: number; // minutes selected
+  timeUsed: number; // seconds actually used
   createdAt: string;
   transcript: Message[];
   scores: ScoreReport;

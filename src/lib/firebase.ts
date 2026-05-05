@@ -111,13 +111,24 @@ export const logout = () => signOut(auth);
 export const saveRegistration = async (email: string) => {
   const path = 'registrations';
   try {
-    const registrationRef = doc(collection(db, path));
-    await setDoc(registrationRef, {
+    // Check if email already exists
+    const q = query(collection(db, path), where('email', '==', email));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      throw new Error('ALREADY_EXISTS');
+    }
+
+    const regRef = doc(collection(db, path));
+    await setDoc(regRef, {
       email,
-      registeredAt: Timestamp.now()
+      createdAt: Timestamp.now(),
+      source: 'beta_banner'
     });
-    return registrationRef.id;
+    return regRef.id;
   } catch (error) {
+    if (error instanceof Error && error.message === 'ALREADY_EXISTS') {
+      throw error;
+    }
     handleFirestoreError(error, OperationType.CREATE, path);
   }
 };

@@ -144,7 +144,14 @@ export default function App() {
       feedback: session.scores.fixNext.map(f => f.item),
       transcript: session.transcript,
       evaluatorType: session.evaluatorType,
-      roundLength: session.roundLength
+      roundLength: session.roundLength,
+      timeUsed: session.timeUsed,
+      // Metadata for Admin Dashboard
+      companyName: currentProfile.name,
+      companyStage: currentProfile.stage,
+      businessModel: currentProfile.businessModel,
+      userEmail: user?.email || 'Anonymous',
+      userDisplayName: user?.displayName || 'Anonymous'
     });
 
     // Show beta banner after first simulation

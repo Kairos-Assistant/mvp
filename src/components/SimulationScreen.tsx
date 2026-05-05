@@ -234,6 +234,9 @@ export default function SimulationScreen({ profile, config, onEnd, onCancel }: S
         parseInt(config.roundLength)
       );
       
+      const totalSelectedSeconds = parseInt(config.roundLength) * 60;
+      const actualTimeUsed = totalSelectedSeconds - totalTimeLeft;
+
       const session: SimulationSession = {
         id: uuidv4(),
         companyProfileId: profile.id,
@@ -241,6 +244,7 @@ export default function SimulationScreen({ profile, config, onEnd, onCancel }: S
         focusType: config.focus,
         difficulty: config.difficulty,
         roundLength: parseInt(config.roundLength),
+        timeUsed: actualTimeUsed,
         createdAt: new Date().toISOString(),
         transcript,
         scores,

@@ -12,6 +12,7 @@ export default function BetaBanner({ onClose }: BetaBannerProps) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,9 +27,14 @@ export default function BetaBanner({ onClose }: BetaBannerProps) {
       setSubmitted(true);
       console.log("Waitlist submission successful");
     } catch (error) {
-      console.error("Waitlist error:", error);
-      // Still show success to user for better UX in MVP
-      setSubmitted(true);
+      if (error instanceof Error && error.message === 'ALREADY_EXISTS') {
+        setErrorMessage("You're already on the list! We'll be in touch soon.");
+        setSubmitted(true); // Treat as success for the user
+      } else {
+        console.error("Waitlist error:", error);
+        // Still show success to user for better UX in MVP unless it's a critical failure
+        setSubmitted(true);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +72,7 @@ export default function BetaBanner({ onClose }: BetaBannerProps) {
             <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white shrink-0">
               <Check size={18} />
             </div>
-            <span>You're on the list! We'll be in touch soon.</span>
+            <span>{errorMessage || "You're on the list! We'll be in touch soon."}</span>
           </motion.div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
