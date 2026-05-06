@@ -137,6 +137,9 @@ export default function App() {
     setCurrentSession(session);
     setCurrentScreen("results");
     
+    const resolvedEmail = user?.email || StorageService.getUserEmail() || currentProfile.email || '';
+    const resolvedName = user?.displayName || (resolvedEmail ? resolvedEmail.split('@')[0] : 'Anonymous');
+
     // Save to Firebase (even if not logged in)
     saveSimulation(user?.uid || null, {
       id: session.id,
@@ -150,8 +153,8 @@ export default function App() {
       companyName: currentProfile.name,
       companyStage: currentProfile.stage,
       businessModel: currentProfile.businessModel,
-      userEmail: user?.email || 'Anonymous',
-      userDisplayName: user?.displayName || 'Anonymous'
+      userEmail: resolvedEmail || 'Anonymous',
+      userDisplayName: resolvedName || 'Anonymous'
     });
 
     // Show beta banner after first simulation
