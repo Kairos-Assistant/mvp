@@ -136,7 +136,7 @@ export const saveRegistration = async (email: string) => {
 export const getRegistrations = async () => {
   const path = 'registrations';
   try {
-    const q = query(collection(db, path), orderBy('registeredAt', 'desc'));
+    const q = query(collection(db, path), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {

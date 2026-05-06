@@ -7,7 +7,7 @@ import { cn } from '../lib/utils';
 interface Registration {
   id: string;
   email: string;
-  registeredAt: any;
+  createdAt: any;
 }
 
 export default function Registrations() {
@@ -45,7 +45,7 @@ export default function Registrations() {
       ["Email", "Registered At"],
       ...filtered.map(r => [
         r.email, 
-        r.registeredAt?.toDate ? format(r.registeredAt.toDate(), 'yyyy-MM-dd HH:mm:ss') : 'Unknown'
+        r.createdAt?.toDate ? format(r.createdAt.toDate(), 'yyyy-MM-dd HH:mm:ss') : 'Unknown'
       ])
     ].map(e => e.join(",")).join("\n");
 
@@ -99,7 +99,7 @@ export default function Registrations() {
           <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Last 24 Hours</p>
           <p className="text-3xl font-bold text-slate-900">
             {registrations.filter(r => {
-              const date = r.registeredAt?.toDate ? r.registeredAt.toDate() : new Date(0);
+              const date = r.createdAt?.toDate ? r.createdAt.toDate() : new Date(0);
               return new Date().getTime() - date.getTime() < 24 * 60 * 60 * 1000;
             }).length}
           </p>
@@ -175,7 +175,7 @@ export default function Registrations() {
                       <div className="flex items-center gap-2 text-slate-500">
                         <Calendar size={16} />
                         <span className="font-medium">
-                          {reg.registeredAt?.toDate ? format(reg.registeredAt.toDate(), 'MMM d, yyyy • h:mm a') : 'Unknown'}
+                          {reg.createdAt?.toDate ? format(reg.createdAt.toDate(), 'MMM d, yyyy • h:mm a') : 'Unknown'}
                         </span>
                       </div>
                     </td>
